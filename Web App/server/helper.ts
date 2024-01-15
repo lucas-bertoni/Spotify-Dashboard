@@ -86,7 +86,7 @@ const getTopArtists = async (numRecords: number = 10, cursor: number = 0, before
                 SELECT *, ROW_NUMBER() OVER(ORDER BY num_plays DESC) AS row_num
                 FROM TOP_ARTISTS
             )
-            SELECT row_num, artist_id, artist_name, num_plays
+            SELECT row_num, TA.artist_id, artist_name, num_plays
             FROM TOP_ARTISTS_WITH_ROW_NUMS TA
             JOIN "SPOTIFY_DATA"."ARTISTS" A ON TA.artist_id = A.artist_id 
             WHERE row_num BETWEEN ${cursor * numRecords} AND ${(cursor + 1) * numRecords}
