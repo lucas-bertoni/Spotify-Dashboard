@@ -1,4 +1,6 @@
 /Airflow/logs
-/Airflow/.env
 /Airflow/files/temp
-/Airflow/dags/__pycache__
+/Airflow/dags/__pycache__/
+node_modules/
+out/
+.env
