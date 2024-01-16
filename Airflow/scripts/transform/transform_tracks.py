@@ -11,6 +11,7 @@ with open('/opt/airflow/files/temp/json/tracks.json', 'r') as json_file:
     album_artist_rows = []
 
     for track in tracks:
+        print(track)
         # For the main tables
         song_row = {
             'song_id': track['id'],

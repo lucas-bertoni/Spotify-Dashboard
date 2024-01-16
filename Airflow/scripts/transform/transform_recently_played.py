@@ -14,7 +14,7 @@ with open('/opt/airflow/files/temp/json/recently_played.json', 'r') as json_file
 
         row = {
             'played_at': played_at,
-            'duration_played': track['duration_ms'],
+            'duration_played_ms': track['duration_ms'],
             'song_id': track['id']
         }
 

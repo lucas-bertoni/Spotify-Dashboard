@@ -16,7 +16,7 @@ with DAG(dag_id='REFRESH-ACCESS-TOKEN', default_args=default_args, schedule_inte
         dag=dag_1
     )
 
-with DAG(dag_id='SPOTIFY-LISTENING-HISTORY', default_args=default_args, schedule_interval=timedelta(minutes=10), catchup=False) as dag_2:
+with DAG(dag_id='SPOTIFY-LISTENING-HISTORY', default_args=default_args, schedule_interval=None, catchup=False) as dag_2: # timedelta(minutes=10)
     get_recently_played = BashOperator(
         task_id='get_recently_played',
         bash_command=f'python {os.getcwd()}/scripts/extract/get_recently_played.py',
