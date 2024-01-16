@@ -50,10 +50,13 @@ app.get('/api/v1/recently_played', async (req: Request, res: Response) => {
 
 // Get the top 10 most played songs for a given time period
 app.get('/api/v1/top_songs', async (req: Request, res: Response) => {
-    const { numRecords, cursor }: { numRecords: number, cursor: number } = req.body;
+    // @ts-ignore
+    const { numRecords, cursor, after, before }: { numRecords: number, cursor: number, after: string, before: string } = req.query;
+
+    veryifyDates(res, after, before);
 
     try {
-        const songs: TopSong[] | undefined = await helper.getTopSongs(numRecords, cursor);
+        const songs: TopSong[] | undefined = await helper.getTopSongs(numRecords, cursor, after, before);
         res.status(200).send({ songs: songs });
     } catch (error) {
         res.status(500).send('Error getting top songs');
@@ -62,7 +65,10 @@ app.get('/api/v1/top_songs', async (req: Request, res: Response) => {
 
 // Get the top 10 most played artists for a given time period
 app.get('/api/v1/top_artists', async (req: Request, res: Response) => {
-    const { numRecords, cursor }: { numRecords: number, cursor: number } = req.body;
+    // @ts-ignore
+    const { numRecords, cursor, after, before }: { numRecords: number, cursor: number, after: string, before: string } = req.query;
+
+    veryifyDates(res, after, before);
 
     try {
         const artists: TopArtist[] | undefined = await helper.getTopArtists(numRecords, cursor);
@@ -74,8 +80,11 @@ app.get('/api/v1/top_artists', async (req: Request, res: Response) => {
 
 // Get the top 10 most played artists for a given time period
 app.get('/api/v1/top_albums', async (req: Request, res: Response) => {
-    const { numRecords, cursor }: { numRecords: number, cursor: number } = req.body;
+    // @ts-ignore
+    const { numRecords, cursor, after, before }: { numRecords: number, cursor: number, after: string, before: string } = req.query;
 
+    veryifyDates(res, after, before);
+    
     try {
         const albums: TopAlbum[] | undefined = await helper.getTopAlbums(numRecords, cursor);
         res.status(200).send({ albums: albums });
@@ -87,3 +96,14 @@ app.get('/api/v1/top_albums', async (req: Request, res: Response) => {
 app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`)
 });
+
+function veryifyDates(res: Response, after: string, before: string) {
+    if (Date.parse(after) > Date.parse(before)) {
+        res.status(400).send({ error: 'after cannot be greater than before' });
+    }
+    
+    const today = new Date().toLocaleDateString();
+    if (Date.parse(after) > Date.parse(today)) {
+        res.status(400).send({ error: 'after cannot be greater than today' })
+    }
+}

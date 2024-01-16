@@ -10,6 +10,7 @@ interface Song {
 
 import { DatabaseConnection } from './DatabaseConnection';
 import { QueryResult } from 'pg';
+import moment from 'moment-timezone';
 
 const dbConn = new DatabaseConnection();
 dbConn.connect();
@@ -37,14 +38,16 @@ const getRecentlyPlayed = async (numRecords: number = 50, cursor: number = 0) =>
     }
 };
 
-// Get the top songs between the dates given by before and after
-const getTopSongs = async (numRecords: number = 10, cursor: number = 0, before: string = '', after: string = '') => {
+// Get the top songs between the dates given by before and before
+const getTopSongs = async (numRecords: number = 10, cursor: number = 0, after: string = '', before: string = '') => {
     try {
+        const dateConstraintString = getDateConstraintString(after, before);
+
         const query = `
             WITH TOP_SONGS AS (
                 SELECT song_id, song_name, artist_names, COUNT(*) AS num_plays
                 FROM HISTORY
-                WHERE amount_played >= 0.75 ${before === '' || after === '' ? '' : ' AND played_at BETWEEN ' + before + ' AND ' + after}
+                WHERE amount_played >= 0.75 ${dateConstraintString}
                 GROUP BY song_id, song_name, artist_names
                 ORDER BY num_plays DESC
             ),
@@ -58,6 +61,8 @@ const getTopSongs = async (numRecords: number = 10, cursor: number = 0, before: 
             ORDER BY num_plays DESC;
         `;
 
+        console.log(query)
+
         const result: QueryResult = await dbConn.pool.query(query);
 
         return result.rows;
@@ -67,14 +72,16 @@ const getTopSongs = async (numRecords: number = 10, cursor: number = 0, before: 
     }
 };
 
-// Get the top artists between the dates given by before and after
-const getTopArtists = async (numRecords: number = 10, cursor: number = 0, before: string = '', after: string = '') => {
+// Get the top artists between the dates given by before and before
+const getTopArtists = async (numRecords: number = 10, cursor: number = 0, after: string = '', before: string = '') => {
     try {
+        const dateConstraintString = getDateConstraintString(after, before);
+
         const query = `
             WITH UNNEST_ARTISTS AS (
                 SELECT played_at, UNNEST(artist_ids) AS artist_id, amount_played
                 FROM HISTORY
-                WHERE amount_played >= 0.75 ${before === '' || after === '' ? '' : ' AND played_at BETWEEN ' + before + ' AND ' + after}
+                WHERE amount_played >= 0.75 ${dateConstraintString}
             ),
             TOP_ARTISTS AS (
                 SELECT artist_id, COUNT(*) AS num_plays
@@ -102,14 +109,16 @@ const getTopArtists = async (numRecords: number = 10, cursor: number = 0, before
     }
 };
 
-// Get the top songs between the dates given by before and after
-const getTopAlbums = async (numRecords: number = 10, cursor: number = 0, before: string = '', after: string = '') => {
+// Get the top songs between the dates given by before and before
+const getTopAlbums = async (numRecords: number = 10, cursor: number = 0, after: string = '', before: string = '') => {
     try {
+        const dateConstraintString = getDateConstraintString(after, before);
+
         const query = `
             WITH TOP_ALBUMS AS (
                 SELECT album_id, album_name, COUNT(*) AS num_plays
                 FROM HISTORY
-                WHERE amount_played >= 0.75 ${before === '' || after === '' ? '' : ' AND played_at BETWEEN ' + before + ' AND ' + after}
+                WHERE amount_played >= 0.75 ${dateConstraintString}
                 GROUP BY album_id, album_name
                 ORDER BY num_plays DESC
             ),
@@ -134,5 +143,36 @@ const getTopAlbums = async (numRecords: number = 10, cursor: number = 0, before:
         console.log(error)
     }
 };
+
+function getDateConstraintString(after: string, before: string): string {
+    const tzFormatter = Intl.DateTimeFormat('en-US', {
+        timeZone: "America/New_York"
+     })
+
+    let dateConstraintString = '';
+
+    let afterDate = moment.tz(after, 'America/New_York');
+    let beforeDate = moment.tz(before, 'America/New_York');
+
+    if (after !== '' && before === '') {            // Only after is defined
+
+        dateConstraintString = `AND DATE(played_at) > '${afterDate}'`;
+
+    } else if (after === '' && before !== '') {     // Only before is defined
+
+        dateConstraintString = `AND DATE(played_at) < '${beforeDate}'`;
+
+    } else if (after === before && after !== '') {  // Both are defined and equal
+
+        dateConstraintString = `AND DATE(played_at) = '${afterDate}'`;
+
+    } else if (after !== '' && before !== '') {     // Both are defined and not equal
+
+        dateConstraintString = `AND DATE(played_at) >= '${afterDate.format('YYYY-MM-DD')}' AND DATE(played_at) < '${beforeDate.format('YYYY-MM-DD')}'`;
+
+    }
+
+    return dateConstraintString;
+}
 
 export { getRecentlyPlayed, getTopSongs, getTopArtists, getTopAlbums }
