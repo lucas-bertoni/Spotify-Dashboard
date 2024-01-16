@@ -5,7 +5,7 @@
 -- Dumped from database version 16.1
 -- Dumped by pg_dump version 16.1
 
--- Started on 2024-01-15 14:24:13
+-- Started on 2024-01-16 11:54:37
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -138,15 +138,18 @@ CREATE TABLE "SPOTIFY_DATA"."SONG_ARTISTS" (
 ALTER TABLE "SPOTIFY_DATA"."SONG_ARTISTS" OWNER TO postgres;
 
 --
--- TOC entry 224 (class 1259 OID 16680)
+-- TOC entry 224 (class 1259 OID 16685)
 -- Name: history; Type: VIEW; Schema: public; Owner: postgres
 --
 
 CREATE VIEW public.history AS
  SELECT lh.played_at,
-    s.song_name AS song,
-    array_agg(art.artist_name) AS artists,
-    alb.album_name AS album,
+    s.song_id,
+    s.song_name,
+    array_agg(art.artist_id) AS artist_ids,
+    array_agg(art.artist_name) AS artist_names,
+    alb.album_id,
+    alb.album_name,
     s.song_duration_ms,
     lh.duration_played_ms,
     round(((lh.duration_played_ms / s.song_duration_ms))::numeric, 2) AS amount_played
@@ -156,7 +159,7 @@ CREATE VIEW public.history AS
      JOIN "SPOTIFY_DATA"."ARTISTS" art ON (((sart.artist_id)::text = (art.artist_id)::text)))
      JOIN "SPOTIFY_DATA"."SONG_ALBUM" salb ON (((s.song_id)::text = (salb.song_id)::text)))
      JOIN "SPOTIFY_DATA"."ALBUMS" alb ON (((salb.album_id)::text = (alb.album_id)::text)))
-  GROUP BY lh.played_at, s.song_name, alb.album_name, lh.duration_played_ms, s.song_duration_ms
+  GROUP BY lh.played_at, s.song_id, s.song_name, alb.album_id, alb.album_name, lh.duration_played_ms, s.song_duration_ms
   ORDER BY lh.played_at DESC;
 
 
@@ -252,8 +255,9 @@ ALTER TABLE ONLY "SPOTIFY_DATA"."SONGS"
     ADD CONSTRAINT song_id_unique UNIQUE (song_id);
 
 
--- Completed on 2024-01-15 14:24:14
+-- Completed on 2024-01-16 11:54:37
 
 --
 -- PostgreSQL database dump complete
 --
+

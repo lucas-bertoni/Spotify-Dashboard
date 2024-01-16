@@ -25,5 +25,5 @@ if response.status_code != 200:
     raise Exception('Error getting refreshed access token: ' + response.text)
 else:
     at = response.json()['access_token']
-    with open('/opt/airflow/files/access_token.txt', 'w') as file:
+    with open('/opt/airflow/files/access_token.txt', 'a') as file:
         file.write(at)

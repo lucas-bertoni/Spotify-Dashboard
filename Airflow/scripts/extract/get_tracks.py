@@ -1,12 +1,8 @@
 import requests
 import json
-import os
 from dotenv import load_dotenv
-import psycopg2
 
 load_dotenv('/opt/airflow/.env')
-
-postgres_conn = psycopg2.connect(os.getenv('POSTGRES_CONNECTION_STRING'))
 
 song_ids = []
 
@@ -44,7 +40,7 @@ if (len(song_ids) > 0):
                     del track['available_markets']
                     del album['available_markets']
 
-                with open('/opt/airflow/files/temp/json/tracks.json', 'w') as file:
+                with open('/opt/airflow/files/temp/json/tracks.json', 'a') as file:
                     json.dump(tracks, file)
             except:
                 raise Exception('There was an issue creating the JSON file')

@@ -26,7 +26,7 @@ else:
     at = response.json()['access_token']
     rt = response.json()['refresh_token']
 
-    with open('/opt/airflow/files/access_token.txt', 'w') as file:
+    with open('/opt/airflow/files/access_token.txt', 'a') as file:
         file.write(at)
 
     print(rt)

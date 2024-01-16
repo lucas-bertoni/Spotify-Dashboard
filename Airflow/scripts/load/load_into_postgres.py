@@ -137,11 +137,7 @@ def extract_data_to_df(file_names):
             df = pd.read_csv(object['Body'])
             dfs.append(df)
         except:
-            print('csv is empty, deleting')
-            # response = s3_client.delete_object(
-            #     Bucket=bucket_name,
-            #     Key=file_name
-            # )
+            print('csv is empty')
 
     if (len(dfs) > 0):
         main_df = pd.concat(dfs)
