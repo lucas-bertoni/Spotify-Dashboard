@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 from dotenv import load_dotenv
 
 load_dotenv('/opt/airflow/.env')
@@ -40,7 +41,11 @@ if (len(song_ids) > 0):
                     del track['available_markets']
                     del album['available_markets']
 
-                with open('/opt/airflow/files/temp/json/tracks.json', 'a') as file:
-                    json.dump(tracks, file)
+                if (os.path.exists('/opt/airflow/files/temp/json/tracks.json')):
+                    with open('/opt/airflow/files/temp/json/tracks.json', 'w') as file:
+                        json.dump(items, file)
+                else:
+                    with open('/opt/airflow/files/temp/json/tracks.json', 'a') as file:
+                        json.dump(items, file)
             except:
                 raise Exception('There was an issue creating the JSON file')
