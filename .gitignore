@@ -1,5 +1,5 @@
 /Airflow/logs/*
-**/access_token.txt
+access_token.txt
 /Airflow/files/temp/csv/*
 /Airflow/files/temp/json/*
 /Airflow/dags/__pycache__/
