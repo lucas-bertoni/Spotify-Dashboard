@@ -1,7 +1,7 @@
 /Airflow/logs/*
 access_token.txt
-/Airflow/files/temp/csv/*
-/Airflow/files/temp/json/*
+/Airflow/files/temp/csv/*.csv
+/Airflow/files/temp/json/*.json
 /Airflow/dags/__pycache__/
 node_modules/
 out/
